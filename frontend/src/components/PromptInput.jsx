@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { generateVideo } from '../api';
+import { generateDrawing } from '../api';
 
-function PromptInput({ onSubmit, onVideoGenerated, onError }) {
+function PromptInput({ onSubmit, onDrawingGenerated, onError }) {
   const [prompt, setPrompt] = useState('');
 
   const handleSubmit = async (e) => {
@@ -9,11 +9,16 @@ function PromptInput({ onSubmit, onVideoGenerated, onError }) {
     if (!prompt.trim()) return;
 
     try {
-      onSubmit();
-      const response = await generateVideo(prompt);
-      onVideoGenerated(`http://localhost:8000${response.video_url}`);
+      onSubmit(prompt);
+      const response = await generateDrawing(prompt);
+      
+      if (response.status === 'success') {
+        onDrawingGenerated(`http://localhost:8000${response.image_url}`, prompt);
+      } else {
+        onError(response.message || 'Failed to generate drawing');
+      }
     } catch (error) {
-      onError(error.response?.data?.detail || 'Failed to generate video');
+      onError(error.response?.data?.message || error.message || 'Failed to generate drawing');
     }
   };
 
@@ -24,14 +29,14 @@ function PromptInput({ onSubmit, onVideoGenerated, onError }) {
           htmlFor="prompt" 
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Enter your animation prompt
+          Enter your drawing prompt
         </label>
         <textarea
           id="prompt"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Example: Create a circle that transforms into a square"
+          placeholder="Example: draw a red circle, draw a blue house, draw a filled green star"
           rows="3"
         />
       </div>
@@ -40,7 +45,7 @@ function PromptInput({ onSubmit, onVideoGenerated, onError }) {
         className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
         disabled={!prompt.trim()}
       >
-        Generate Animation
+        Generate Drawing
       </button>
     </form>
   );

@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-export const generateVideo = async (prompt) => {
+export const generateDrawing = async (prompt) => {
   const response = await api.post('/generate', { prompt });
   return response.data;
 }; 
